@@ -75,7 +75,7 @@ jobs:
           source: docker-compose.prod.yml
           target: ${{ vars.DEPLOY_PATH }}
       - name: Pull and restart
-        uses: appleboy/ssh-action@v1.0.3
+        uses: appleboy/ssh-action@v1.2.5
         env:
           IMAGE_TAG: ${{ needs.publish.outputs.image_tag }}
           API_IMAGE: ${{ env.REGISTRY }}/${{ env.REPO }}-api
