@@ -7,12 +7,12 @@ import { Disclaimer } from "./ui";
 const menus: Record<Role, { to: string; label: string; end?: boolean }[]> = {
   patient: [
     { to: "/app", label: "Overview", end: true }, { to: "/app/symptoms", label: "Symptom assessment" },
-    { to: "/app/wellness", label: "Wellness assessment" }, { to: "/app/measurements", label: "Measurements" },
+    { to: "/app/wellness", label: "Wellness assessment" }, { to: "/app/health", label: "Health record" }, { to: "/app/measurements", label: "Measurements" },
     { to: "/app/assessments", label: "History" }, { to: "/app/appointments", label: "Appointments" },
     { to: "/app/profile", label: "Profile and privacy" },
   ],
   clinician: [
-    { to: "/clinic", label: "Review queue", end: true }, { to: "/clinic/patients", label: "Patients" },
+    { to: "/clinic", label: "Review queue", end: true }, { to: "/clinic/patients", label: "Patients" }, { to: "/clinic/health", label: "Alerts and reminders" },
     { to: "/clinic/calibration", label: "Local calibration" },
   ],
   clinic_admin: [

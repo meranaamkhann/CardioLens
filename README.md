@@ -2,6 +2,10 @@
 
 An AI-assisted heart-health platform for patients, clinicians and researchers. It keeps four kinds of information strictly apart: patient-reported, rule-based triage, model-generated, and clinician-reviewed. It is not a diagnostic system.
 
+## Health record (version 1.2)
+
+Patients and clinicians share a longitudinal record: 46 lab biomarkers with typical ranges, trends and alerts, medications with interaction checks, ICD-10 diagnoses, diet plans, CSV import and export, and check-up reminders. Entries are labelled as patient-entered or clinician-entered. These layers use guideline ranges and transparent rules. They are not machine-learning predictions, and cancer or diabetes risk is not predicted. See `THIRD_PARTY_NOTICES.md` for the open-source project that informed this feature set.
+
 ## Model refinements in version 1.1
 
 - Every score carries a plausible range from 200 bootstrap-resampled logistic models, and a wide range lowers the confidence label.
@@ -49,8 +53,8 @@ Set `POSTGRES_PASSWORD` and `SECRET_KEY` in `.env`. The app is served on http://
 
 ## Tests
 
-    cd backend && python -m pytest        # 66 tests: auth, authorization, assessments, clinic isolation, uncertainty and second opinion, data export and deletion, research methodology, uploads, reports, migrations, end-to-end workflow
-    cd frontend && npm test               # 27 tests: API client, routing, the symptom stepper, draft restore, account deletion, queue filters, run comparison, accessibility preferences, assessment and research views rendered from real API responses
+    cd backend && python -m pytest        # 103 tests: auth, health record (biomarkers, trends, alerts, medications, interactions, CSV, access control), authorization, assessments, clinic isolation, uncertainty and second opinion, data export and deletion, research methodology, uploads, reports, migrations, end-to-end workflow
+    cd frontend && npm test               # 39 tests: health record workflows, API client, routing, the symptom stepper, draft restore, account deletion, queue filters, run comparison, accessibility preferences, assessment and research views rendered from real API responses
     cd frontend && npm run build          # type-check and production build
 
 ## Reproduce the paper

@@ -93,3 +93,13 @@ def test_health(client, path):
 
 def test_security_headers(client):
     assert client.get("/api/health").headers["x-content-type-options"] == "nosniff"
+
+
+def test_production_rejects_weak_secret(monkeypatch):
+    from app.config import Settings
+    monkeypatch.setenv("CARDIOLENS_ENV", "production")
+    monkeypatch.setenv("SECRET_KEY", "too-short")
+    with pytest.raises(RuntimeError):
+        Settings()
+    monkeypatch.setenv("SECRET_KEY", "a" * 40)
+    assert Settings().secret_key == "a" * 40

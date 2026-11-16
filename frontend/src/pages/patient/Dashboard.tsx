@@ -26,6 +26,15 @@ export default function Dashboard() {
           Assessments need your sex, birth year and smoking status. <Link to="/app/profile">Update your profile</Link>.
         </Notice>
       )}
+      {data.health.critical_alerts > 0 && (
+        <Notice tone="danger" title={`${data.health.critical_alerts} critical lab result${data.health.critical_alerts === 1 ? "" : "s"}`}>
+          Contact your doctor promptly. <Link to="/app/health">Open your health record</Link>.
+        </Notice>
+      )}
+      {data.health.serious_interactions > 0 && (
+        <Notice tone="warn" title="Serious medicine interaction">Two of your current medicines can interact seriously. <Link to="/app/health">Review them</Link> and ask a pharmacist.</Notice>
+      )}
+      {data.health.overdue.overdue && <Notice tone="info" title="Check-up reminder">{data.health.overdue.message} <Link to="/app/health">Add results</Link>.</Notice>}
       <div className="stats">
         <Stat label="Assessments" value={data.total_assessments} />
         <Stat label="Blood pressure" value={bp} hint="mmHg, latest" status={bloodPressure(m.systolic, m.diastolic)} />

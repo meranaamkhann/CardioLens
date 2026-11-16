@@ -13,7 +13,7 @@ from .config import get_settings
 from .core import logging as log_setup
 from .db.base import Base, SessionLocal, engine as db_engine
 from .engine import Engine
-from .routers import admin, auth, clinician, patient, public, research
+from .routers import admin, auth, clinician, health, patient, public, research
 from .services import registry
 
 log = logging.getLogger("cardiolens")
@@ -73,6 +73,8 @@ def create_app(artifact_dir: Optional[Path] = None, static_dir: Optional[Path] =
 
     for module in (public, auth, patient, clinician, admin, research):
         app.include_router(module.router, prefix="/api")
+    for extra in (health.patient_router, health.clinic_router, health.overview_router):
+        app.include_router(extra, prefix="/api")
 
     if static_dir.exists() and (static_dir / "index.html").exists():
         app.mount("/assets", StaticFiles(directory=static_dir / "assets"), name="assets")

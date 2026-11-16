@@ -312,3 +312,18 @@ progress { accent-color: var(--teal); vertical-align: middle; width: 140px; }
   .sidebar-foot { margin-top: 0; border: 0; padding: 0; display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
   .role-chip { display: none; }
 }
+
+.grid3 { display: grid; gap: 12px; grid-template-columns: 1fr; margin: 10px 0; }
+@media (min-width: 700px) { .grid3 { grid-template-columns: repeat(3, 1fr); } }
+.accordion { border: 1px solid var(--line); border-radius: 12px; margin: 8px 0; padding: 0 12px; }
+.accordion > button { width: 100%; background: none; border: 0; display: flex; justify-content: space-between; gap: 10px; padding: 12px 2px; cursor: pointer; font-weight: 650; color: var(--ink); text-align: left; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+.value-chip { background: #f4f7f7; border: 1px solid var(--line); border-radius: 999px; padding: 3px 10px; font-size: 0.88rem; }
+.faded { opacity: 0.6; }
+.alert-row.critical { border-left: 4px solid var(--red); padding-left: 10px; }
+.alert-row.warning { border-left: 4px solid #d99a2b; padding-left: 10px; }
+.alert-row.info { border-left: 4px solid #b9c9cc; padding-left: 10px; }
+.alert-row p { margin: 4px 0 0; }
+.trend-card { text-align: left; display: grid; gap: 4px; cursor: pointer; }
+.trend-card.on { border-color: var(--teal); box-shadow: inset 0 0 0 1px var(--teal); }
+.trend-card .stat-value small { font-size: 0.8rem; color: var(--muted); font-weight: 400; }

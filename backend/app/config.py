@@ -16,7 +16,9 @@ class Settings:
         if not self.secret_key:
             if self.environment == "production":
                 raise RuntimeError("SECRET_KEY must be set in production")
-            self.secret_key = "development-only-secret-key-change-me"
+            self.secret_key = "development-only-secret-key-change-me-0123456789"
+        if self.environment == "production" and len(self.secret_key) < 32:
+            raise RuntimeError("SECRET_KEY must be at least 32 characters in production")
         self.fernet_key = env("FERNET_KEY", "")
         self.token_minutes = int(env("ACCESS_TOKEN_MINUTES", "60"))
         self.data_dir = Path(env("CARDIOLENS_DATA", ROOT / "data" / "raw"))

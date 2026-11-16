@@ -10,9 +10,11 @@ from ..core.crypto import decrypt
 from ..core.deps import require
 from ..db.base import get_db
 from ..core.security import verify_password
-from ..db.models import (Appointment, Assessment, AuditEvent, ClinicalNote, Measurement, PatientProfile, Report, User)
+from ..db.models import (Appointment, Assessment, AuditEvent, ClinicalNote, Diagnosis, DietPlan, HealthAlert, LabCheckup, Measurement,
+                         Medication, PatientProfile, Report, User)
 from ..schemas import (AppointmentCreate, DeleteAccount, AppointmentUpdate, MeasurementCreate, ProfileUpdate, SymptomAssessment,
                        WellnessAssessment)
+from ..health.service import health_export, health_summary
 from ..services import assessments as svc
 from ..services import reports
 from ..services.registry import model_tag
@@ -60,7 +62,7 @@ def dashboard(user: User = patient, db: Session = Depends(get_db)):
     return {"user": user_out(user), "profile": profile_out(user), "total_assessments": total,
             "recent": [assessment_out(a, detail=False) for a in recent],
             "latest_measurements": svc.latest_measurements(db, user.id),
-            "upcoming": [appointment_out(a) for a in upcoming]}
+            "upcoming": [appointment_out(a) for a in upcoming], "health": health_summary(db, user)}
 
 
 @router.post("/assessments/symptom", status_code=201)
@@ -226,7 +228,7 @@ def export_everything(request: Request, user: User = patient, db: Session = Depe
     body = {"exported_at": datetime.now(timezone.utc).isoformat(), "account": user_out(user), "profile": profile_out(user),
             "assessments": [assessment_out(a) for a in assessments],
             "measurements": [{"kind": m.kind, "value": m.value, "unit": UNITS.get(m.kind), "measured_at": m.measured_at.isoformat()} for m in measurements],
-            "appointments": [appointment_out(a) for a in appointments]}
+            "appointments": [appointment_out(a) for a in appointments], "health_record": health_export(db, user)}
     return Response(json.dumps(body, indent=2), media_type="application/json",
                     headers={"Content-Disposition": 'attachment; filename="cardiolens-my-data.json"'})
 
@@ -236,6 +238,8 @@ def delete_account(payload: DeleteAccount, request: Request, user: User = patien
     if not verify_password(payload.password, user.password_hash):
         raise HTTPException(403, "That password is not correct.")
     clinic_id = user.clinic_id
+    for model in (HealthAlert, LabCheckup, Medication, Diagnosis, DietPlan):
+        db.query(model).filter(model.patient_id == user.id).delete()
     db.query(ClinicalNote).filter(ClinicalNote.patient_id == user.id).delete()
     db.query(Report).filter(Report.patient_id == user.id).delete()
     db.query(Appointment).filter(Appointment.patient_id == user.id).delete()

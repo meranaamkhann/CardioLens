@@ -1,8 +1,8 @@
 import enum
-from datetime import datetime, timezone
+from datetime import date, datetime, timezone
 from typing import Optional
 
-from sqlalchemy import JSON, Boolean, DateTime, Float, ForeignKey, Integer, String, Text, UniqueConstraint
+from sqlalchemy import JSON, Boolean, Date, DateTime, Float, ForeignKey, Integer, String, Text, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from .base import Base
@@ -192,3 +192,79 @@ class AuditEvent(Base):
     ip: Mapped[Optional[str]] = mapped_column(String(45), nullable=True)
     detail: Mapped[Optional[dict]] = mapped_column(JSON, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow, index=True)
+
+
+class LabCheckup(Base):
+    __tablename__ = "lab_checkups"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    patient_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), index=True)
+    checkup_date: Mapped[date] = mapped_column(Date, index=True)
+    values: Mapped[dict] = mapped_column(JSON)
+    notes_encrypted: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    source: Mapped[str] = mapped_column(String(10))
+    created_by: Mapped[int] = mapped_column(ForeignKey("users.id"))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+
+
+class Medication(Base):
+    __tablename__ = "medications"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    patient_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), index=True)
+    name: Mapped[str] = mapped_column(String(120))
+    dose: Mapped[Optional[str]] = mapped_column(String(60), nullable=True)
+    frequency: Mapped[Optional[str]] = mapped_column(String(60), nullable=True)
+    reason: Mapped[Optional[str]] = mapped_column(String(120), nullable=True)
+    start_date: Mapped[Optional[date]] = mapped_column(Date, nullable=True)
+    end_date: Mapped[Optional[date]] = mapped_column(Date, nullable=True)
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True)
+    source: Mapped[str] = mapped_column(String(10))
+    created_by: Mapped[int] = mapped_column(ForeignKey("users.id"))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+
+
+class Diagnosis(Base):
+    __tablename__ = "diagnoses"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    patient_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), index=True)
+    icd10: Mapped[str] = mapped_column(String(10))
+    description: Mapped[str] = mapped_column(String(200))
+    severity: Mapped[Optional[str]] = mapped_column(String(10), nullable=True)
+    status: Mapped[str] = mapped_column(String(10), default="active")
+    diagnosed_on: Mapped[Optional[date]] = mapped_column(Date, nullable=True)
+    source: Mapped[str] = mapped_column(String(10))
+    created_by: Mapped[int] = mapped_column(ForeignKey("users.id"))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+
+
+class DietPlan(Base):
+    __tablename__ = "diet_plans"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    patient_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), index=True)
+    name: Mapped[str] = mapped_column(String(120))
+    diet_type: Mapped[Optional[str]] = mapped_column(String(40), nullable=True)
+    calories: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+    protein_g: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+    carbs_g: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+    fat_g: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+    restrictions: Mapped[list] = mapped_column(JSON, default=list)
+    start_date: Mapped[Optional[date]] = mapped_column(Date, nullable=True)
+    end_date: Mapped[Optional[date]] = mapped_column(Date, nullable=True)
+    notes: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
+    source: Mapped[str] = mapped_column(String(10))
+    created_by: Mapped[int] = mapped_column(ForeignKey("users.id"))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+
+
+class HealthAlert(Base):
+    __tablename__ = "health_alerts"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    patient_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), index=True)
+    severity: Mapped[str] = mapped_column(String(10), index=True)
+    kind: Mapped[str] = mapped_column(String(10))
+    biomarker: Mapped[Optional[str]] = mapped_column(String(30), nullable=True)
+    message: Mapped[str] = mapped_column(String(500))
+    checkup_id: Mapped[Optional[int]] = mapped_column(ForeignKey("lab_checkups.id", ondelete="SET NULL"), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow, index=True)
+    resolved_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    acknowledged_by: Mapped[Optional[int]] = mapped_column(ForeignKey("users.id"), nullable=True)
+    acknowledged_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)

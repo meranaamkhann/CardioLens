@@ -131,6 +131,7 @@ export interface Dashboard {
   recent: AssessmentRecord[];
   latest_measurements: Record<string, number>;
   upcoming: Appointment[];
+  health: HealthSummary;
 }
 
 export interface PatientRow {
@@ -352,4 +353,128 @@ export interface AccessLogRow {
   who: string;
   action: string;
   when: string;
+}
+
+export interface BiomarkerInfo {
+  key: string;
+  label: string;
+  unit: string;
+  category: string;
+  low: number | null;
+  high: number | null;
+  concern: "high" | "low" | "both" | "none";
+  about: string;
+  plausible: [number, number];
+}
+
+export interface BiomarkerCatalogue {
+  categories: Record<string, string>;
+  biomarkers: BiomarkerInfo[];
+  note: string;
+}
+
+export type MarkerStatus = "normal" | "low" | "high" | "critical_low" | "critical_high" | "unknown";
+
+export interface CheckupRow {
+  id: number;
+  date: string;
+  values: Record<string, number>;
+  flags: Record<string, MarkerStatus>;
+  notes: string | null;
+  source: "patient" | "clinician";
+  created_at: string;
+}
+
+export interface TrendSeries {
+  key: string;
+  label: string;
+  unit: string;
+  category: string;
+  low: number | null;
+  high: number | null;
+  points: { date: string; value: number }[];
+  latest: number | null;
+  latest_date: string | null;
+  status: MarkerStatus;
+  slope_per_month: number | null;
+  direction: "rising" | "falling" | "stable" | "unknown";
+  alert: { level: "watch" | "warning"; message: string } | null;
+}
+
+export interface HealthAlertRow {
+  id: number;
+  patient_id: number;
+  patient_name: string | null;
+  severity: "info" | "warning" | "critical";
+  kind: "value" | "trend";
+  biomarker: string | null;
+  label: string | null;
+  message: string;
+  created_at: string;
+  resolved: boolean;
+  acknowledged: boolean;
+}
+
+export interface MedicationRow {
+  id: number;
+  name: string;
+  dose: string | null;
+  frequency: string | null;
+  reason: string | null;
+  start_date: string | null;
+  end_date: string | null;
+  is_active: boolean;
+  source: "patient" | "clinician";
+}
+
+export interface InteractionResult {
+  interactions: { medicines: string[]; severity: "contraindicated" | "major" | "moderate"; effect: string; advice: string }[];
+  not_covered: string[];
+  note: string;
+}
+
+export interface DiagnosisRow {
+  id: number;
+  icd10: string;
+  description: string;
+  severity: "mild" | "moderate" | "severe" | null;
+  status: "active" | "resolved";
+  diagnosed_on: string | null;
+  source: "patient" | "clinician";
+}
+
+export interface DietRow {
+  id: number;
+  name: string;
+  diet_type: string | null;
+  calories: number | null;
+  protein_g: number | null;
+  carbs_g: number | null;
+  fat_g: number | null;
+  restrictions: string[];
+  start_date: string | null;
+  end_date: string | null;
+  notes: string | null;
+  source: "patient" | "clinician";
+}
+
+export interface Reminder {
+  status: "none" | "ok" | "overdue";
+  last_checkup: string | null;
+  days_since: number | null;
+  overdue: boolean;
+  message: string;
+}
+
+export interface HealthSummary {
+  open_alerts: number;
+  critical_alerts: number;
+  overdue: Reminder;
+  interaction_count: number;
+  serious_interactions: number;
+}
+
+export interface OverdueRow extends Reminder {
+  patient_id: number;
+  patient_name: string;
 }

@@ -1,5 +1,5 @@
-from datetime import datetime
-from typing import List, Literal, Optional
+from datetime import date, datetime
+from typing import Dict, List, Literal, Optional
 
 from pydantic import BaseModel, Field, model_validator
 
@@ -158,3 +158,48 @@ class ReviewCreate(BaseModel):
 
 class DeleteAccount(BaseModel):
     password: str = Field(min_length=1, max_length=128)
+
+
+class LabCheckupCreate(BaseModel):
+    checkup_date: date
+    values: Dict[str, float] = Field(min_length=1, max_length=60)
+    notes: Optional[str] = Field(default=None, max_length=1000)
+
+
+class MedicationCreate(BaseModel):
+    name: str = Field(min_length=2, max_length=120)
+    dose: Optional[str] = Field(default=None, max_length=60)
+    frequency: Optional[str] = Field(default=None, max_length=60)
+    reason: Optional[str] = Field(default=None, max_length=120)
+    start_date: Optional[date] = None
+    end_date: Optional[date] = None
+
+
+class MedicationUpdate(BaseModel):
+    is_active: bool
+    end_date: Optional[date] = None
+
+
+class DiagnosisCreate(BaseModel):
+    icd10: str = Field(pattern=r"^[A-TV-Za-tv-z][0-9][0-9A-Za-z](\.[0-9A-Za-z]{1,4})?$")
+    description: str = Field(min_length=3, max_length=200)
+    severity: Optional[Literal["mild", "moderate", "severe"]] = None
+    status: Literal["active", "resolved"] = "active"
+    diagnosed_on: Optional[date] = None
+
+
+class DietPlanCreate(BaseModel):
+    name: str = Field(min_length=2, max_length=120)
+    diet_type: Optional[str] = Field(default=None, max_length=40)
+    calories: Optional[int] = Field(default=None, ge=500, le=6000)
+    protein_g: Optional[float] = Field(default=None, ge=0, le=500)
+    carbs_g: Optional[float] = Field(default=None, ge=0, le=1000)
+    fat_g: Optional[float] = Field(default=None, ge=0, le=500)
+    restrictions: List[str] = Field(default_factory=list, max_length=15)
+    start_date: Optional[date] = None
+    end_date: Optional[date] = None
+    notes: Optional[str] = Field(default=None, max_length=500)
+
+
+class InteractionCheck(BaseModel):
+    medicines: List[str] = Field(min_length=2, max_length=30)

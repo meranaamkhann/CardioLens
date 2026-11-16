@@ -9,3 +9,7 @@ backend/uploads/*.csv
 __pycache__
 .pytest_cache
 .venv
+venv/
+.venv/
+*.pyc
+reference/**/__pycache__

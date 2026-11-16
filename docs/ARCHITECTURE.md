@@ -76,7 +76,7 @@ Safety layering for a symptom assessment: emergency flags and rules produce the 
 
 ## 7. Database design
 
-users(role, clinic_id, lockout fields) - clinics(code) - patient_profiles(user_id) - assessments(patient_id, kind, urgency, inputs JSON, result JSON, model_version, review fields, encrypted summary) - measurements - clinical_notes(encrypted body) - appointments - reports(sha256 of generated file) - model_versions(tag, card JSON, is_active) - clinic_calibrations - datasets(owner, columns JSON, sha256) - experiments(config, result JSON, provenance, progress) - audit_events(actor, clinic, action, entity).
+users(role, clinic_id, lockout fields) - lab_checkups(values JSON, encrypted notes, source) - medications - diagnoses(ICD-10) - diet_plans - health_alerts(kind, severity, resolved and acknowledged) - clinics(code) - patient_profiles(user_id) - assessments(patient_id, kind, urgency, inputs JSON, result JSON, model_version, review fields, encrypted summary) - measurements - clinical_notes(encrypted body) - appointments - reports(sha256 of generated file) - model_versions(tag, card JSON, is_active) - clinic_calibrations - datasets(owner, columns JSON, sha256) - experiments(config, result JSON, provenance, progress) - audit_events(actor, clinic, action, entity).
 
 Isolation: a clinician reaches a patient only when `patient.clinic_id == clinician.clinic_id`. The patient sets that link by entering the clinic code and can remove it, which ends access immediately. Researchers have no route to patient tables. Experiments and datasets are owner-only.
 

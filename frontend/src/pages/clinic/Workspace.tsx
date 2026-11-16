@@ -4,6 +4,7 @@ import { Link, useParams } from "react-router-dom";
 import { api, download } from "../../api/client";
 import type { AssessmentRecord, AuditRow, CalibrationPreview, CalibrationRow, PatientDetail, PatientRow, StaffUser } from "../../api/types";
 import AssessmentView from "../../components/AssessmentView";
+import HealthRecord from "../health/HealthRecord";
 import { TrendChart } from "../../components/charts";
 import { Card, EmptyState, ErrorState, Field, LevelBadge, Notice, Skeleton, Spinner, Tabs, day, when } from "../../components/ui";
 
@@ -76,7 +77,7 @@ export function PatientDirectory() {
   );
 }
 
-type Tab = "assessments" | "measurements" | "notes" | "appointments";
+type Tab = "assessments" | "health" | "measurements" | "notes" | "appointments";
 
 export function PatientPage() {
   const { id } = useParams();
@@ -105,7 +106,7 @@ export function PatientPage() {
       <div className="row between"><div><h1>{data.patient.name}</h1><p className="muted">{data.patient.email}{data.profile.birth_year ? ` · born ${data.profile.birth_year}` : ""}{data.profile.sex ? ` · ${data.profile.sex}` : ""}</p></div>
         <div className="row"><button className="btn ghost small" onClick={() => void download(`/clinic/patients/${id}/export/assessments.csv`, `patient-${id}-assessments.csv`)}>Assessments CSV</button>
           <button className="btn ghost small" onClick={() => void download(`/clinic/patients/${id}/export/measurements.csv`, `patient-${id}-measurements.csv`)}>Measurements CSV</button></div></div>
-      <Tabs value={tab} onChange={setTab} tabs={[{ id: "assessments", label: "Assessments" }, { id: "measurements", label: "Measurements" }, { id: "notes", label: `Notes (${data.notes.length})` }, { id: "appointments", label: "Appointments" }]} />
+      <Tabs value={tab} onChange={setTab} tabs={[{ id: "assessments", label: "Assessments" }, { id: "health", label: "Health record" }, { id: "measurements", label: "Measurements" }, { id: "notes", label: `Notes (${data.notes.length})` }, { id: "appointments", label: "Appointments" }]} />
       {error && <Notice tone="warn">{error}</Notice>}
       {tab === "assessments" && (data.assessments.length === 0 ? <EmptyState title="No assessments yet" /> : (
         <div className="split">
@@ -126,6 +127,7 @@ export function PatientPage() {
           )}
         </div>
       ))}
+      {tab === "health" && <HealthRecord base={`/clinic/patients/${id}/health`} viewer="clinician" />}
       {tab === "measurements" && (
         <Card>
           <select aria-label="Measurement" value={kind} onChange={(e) => setKind(e.target.value)}>{["systolic", "diastolic", "cholesterol", "glucose", "weight", "resting_hr"].map((k) => <option key={k} value={k}>{k.replace("_", " ")}</option>)}</select>

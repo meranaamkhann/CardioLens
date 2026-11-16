@@ -3,7 +3,9 @@ import { Route, Routes, useLocation } from "react-router-dom";
 import RequireRole from "./auth/Guard";
 import { AppShell, PublicLayout } from "./components/Layout";
 import { Spinner } from "./components/ui";
+import ClinicHealth from "./pages/clinic/ClinicHealth";
 import { CalibrationPage, PatientDirectory, PatientPage, ReviewQueue, TeamPage } from "./pages/clinic/Workspace";
+import HealthRecord from "./pages/health/HealthRecord";
 import Dashboard from "./pages/patient/Dashboard";
 import { SymptomAssessment, WellnessAssessment } from "./pages/patient/Assess";
 import { Appointments, AssessmentDetail, Assessments, Measurements, ProfilePage } from "./pages/patient/Records";
@@ -70,6 +72,7 @@ export default function App() {
           <Route index element={<Dashboard />} />
           <Route path="symptoms" element={<SymptomAssessment />} />
           <Route path="wellness" element={<WellnessAssessment />} />
+          <Route path="health" element={<><h1>Health record</h1><HealthRecord base="/me/health" viewer="patient" /></>} />
           <Route path="measurements" element={<Measurements />} />
           <Route path="assessments" element={<Assessments />} />
           <Route path="assessments/:id" element={<AssessmentDetail />} />
@@ -81,6 +84,9 @@ export default function App() {
         <Route path="clinic" element={<AppShell />}>
           <Route index element={<ClinicHome />} />
           <Route path="calibration" element={<CalibrationPage />} />
+          <Route element={<RequireRole roles={["clinician"]} />}>
+            <Route path="health" element={<ClinicHealth />} />
+          </Route>
           <Route element={<RequireRole roles={["clinician"]} />}>
             <Route path="patients" element={<PatientDirectory />} />
             <Route path="patients/:id" element={<PatientPage />} />

@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.2
+
+Longitudinal health record, shared by patients and clinicians: 46 biomarkers in 7 categories with sex-specific typical ranges; lab check-ups with CSV import (atomic, validated) and export; trend analysis using a robust median slope; value alerts (critical, warning, note) and trend alerts; medications with a curated drug-interaction checker and brand-name aliases; ICD-10 diagnoses; diet plans; overdue check-up reminders; clinic-wide alert and overdue views; provenance labels on every entry; lab values feed symptom assessments; health data is included in the data export and removed with the account. New migration 0002.
+
 ## 1.1
 
 Model: bootstrap score ranges, random-forest second opinion with agreement statistics, finer regularisation grid.

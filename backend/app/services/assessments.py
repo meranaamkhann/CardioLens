@@ -5,9 +5,10 @@ from fastapi import HTTPException
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from ..db.models import ClinicCalibration, Measurement, PatientProfile, User
+from ..db.models import ClinicCalibration, LabCheckup, Measurement, PatientProfile, User
 from ..engine import Engine
 from ..schemas import Assessment, LocalCalibration, SymptomAssessment, Wellness, WellnessAssessment
+from ..health.biomarkers import CHECKUP_TO_MEASUREMENT
 from ..wellness import assess_wellness
 from .registry import model_tag
 from .triage import LEVEL_TEXT, higher, triage
@@ -17,12 +18,15 @@ WELLNESS_LEVEL = {"urgent": "urgent", "several": "soon", "some": "routine", "goo
 
 
 def latest_measurements(db: Session, patient_id: int) -> dict:
-    latest = {}
-    rows = db.scalars(select(Measurement).where(Measurement.patient_id == patient_id)
-                      .order_by(Measurement.measured_at.desc())).all()
-    for row in rows:
-        latest.setdefault(row.kind, row.value)
-    return latest
+    stamped = {}
+    for row in db.scalars(select(Measurement).where(Measurement.patient_id == patient_id).order_by(Measurement.measured_at.desc())):
+        stamped.setdefault(row.kind, (row.measured_at.timestamp(), row.value))
+    for row in db.scalars(select(LabCheckup).where(LabCheckup.patient_id == patient_id).order_by(LabCheckup.checkup_date.desc(), LabCheckup.id.desc())):
+        when = datetime(row.checkup_date.year, row.checkup_date.month, row.checkup_date.day, 12, tzinfo=timezone.utc).timestamp()
+        for key, kind in CHECKUP_TO_MEASUREMENT.items():
+            if key in row.values and (kind not in stamped or stamped[kind][0] < when):
+                stamped[kind] = (when, float(row.values[key]))
+    return {kind: value for kind, (_, value) in stamped.items()}
 
 
 def clinic_calibrations(db: Session, clinic_id: Optional[int]) -> list:

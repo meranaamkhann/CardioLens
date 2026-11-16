@@ -1,5 +1,5 @@
 import sys
-from datetime import datetime, timedelta, timezone
+from datetime import date, datetime, timedelta, timezone
 
 import numpy as np
 from sqlalchemy import select
@@ -7,9 +7,10 @@ from sqlalchemy import select
 from .config import get_settings
 from .core.security import hash_password
 from .db.base import Base, SessionLocal, engine
-from .db.models import Appointment, Assessment, Clinic, Measurement, PatientProfile, User
+from .db.models import Appointment, Assessment, Clinic, Diagnosis, DietPlan, Measurement, Medication, PatientProfile, User
 from .engine import Engine
 from .schemas import SymptomAssessment
+from .health import service as health
 from .services import assessments as svc
 
 PASSWORD = "DemoPass123"
@@ -23,6 +24,26 @@ def build_user(db, email, name, role, clinic, profile=None):
     db.add(user)
     db.flush()
     return user
+
+
+def seed_health(db, patient, clinician, index, rng):
+    today = date.today()
+    for step in range(5):
+        when = today - timedelta(days=300 - step * 70)
+        values = {
+            "hemoglobin": round(float(14.2 + rng.normal(0, 0.25)), 1), "glucose_fasting": round(float(92 + index * 14 + step * 2 + rng.normal(0, 3)), 0),
+            "ldl": round(float(78 + index * 22 + step * 6 + rng.normal(0, 2)), 0), "hdl": round(float(52 - index * 4 + rng.normal(0, 1.5)), 0),
+            "total_cholesterol": round(float(165 + index * 25 + step * 5), 0), "bp_systolic": round(float(122 + index * 6 + step * 2)), "bp_diastolic": round(float(78 + index * 2)),
+        }
+        health.create_checkup(db, patient, clinician, "clinician", when, values, None)
+    medicines = [[("Atorvastatin", "20 mg", "once daily", "Cholesterol")], [("Metformin", "500 mg", "twice daily", "Blood sugar")],
+                 [("Coumadin", "5 mg", "once daily", "Anticoagulation"), ("Brufen", "400 mg", "when needed", "Joint pain")]][index]
+    for name, dose, frequency, reason in medicines:
+        db.add(Medication(patient_id=patient.id, name=name, dose=dose, frequency=frequency, reason=reason, source="clinician", created_by=clinician.id))
+    codes = [("I10", "Essential hypertension"), ("E11.9", "Type 2 diabetes mellitus without complications"), ("I48.91", "Atrial fibrillation, unspecified")][index]
+    db.add(Diagnosis(patient_id=patient.id, icd10=codes[0], description=codes[1], severity="mild", status="active", source="clinician", created_by=clinician.id))
+    db.add(DietPlan(patient_id=patient.id, name="Heart-healthy plan", diet_type="Mediterranean", calories=1900, restrictions=["low salt", "limit fried food"],
+                    source="clinician", created_by=clinician.id))
 
 
 def seed():
@@ -60,6 +81,7 @@ def seed():
                                         duration="weeks", severity=4 + index, conditions=["hypertension"] if index != 1 else [])
             inputs, result, level, version = svc.run_symptom(db, engine_, patient, payload)
             db.add(Assessment(patient_id=patient.id, kind="symptom", urgency=level, inputs=inputs, result=result, model_version=version))
+            seed_health(db, patient, clinician, index, rng)
             db.add(Appointment(patient_id=patient.id, clinician_id=clinician.id, scheduled_at=now + timedelta(days=5 + index),
                                reason="Follow-up review", status="confirmed", created_by=clinician.id))
         db.commit()

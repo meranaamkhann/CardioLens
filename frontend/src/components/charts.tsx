@@ -1,5 +1,5 @@
-import { Bar, BarChart, CartesianGrid, Legend, Line, LineChart, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
-import type { Bins, Curve, DecisionCurve, Measurement } from "../api/types";
+import { Bar, BarChart, CartesianGrid, Legend, Line, LineChart, ReferenceArea, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import type { Bins, Curve, DecisionCurve, Measurement, TrendSeries } from "../api/types";
 
 export const PALETTE = ["#0f766e", "#c2410c", "#4f46e5", "#a16207", "#be185d", "#475569"];
 
@@ -138,6 +138,29 @@ export function Heatmap({ rows, columns, values }: { rows: string[]; columns: st
         </tbody>
       </table>
       <p className="muted small">Percentage of records missing, by cohort and predictor.</p>
+    </div>
+  );
+}
+
+export function LabChart({ series }: { series: TrendSeries }) {
+  const data = series.points.map((p) => ({ t: new Date(p.date).getTime(), value: p.value }));
+  const values = series.points.map((p) => p.value);
+  const lows = [...values, ...(series.low !== null ? [series.low] : [])];
+  const highs = [...values, ...(series.high !== null ? [series.high] : [])];
+  const pad = (Math.max(...highs) - Math.min(...lows)) * 0.15 || 1;
+  return (
+    <div className="chart-box" role="img" aria-label={`${series.label} over time with its typical range shaded`}>
+      <ResponsiveContainer width="100%" height={260}>
+        <LineChart data={data} margin={{ top: 8, right: 16, bottom: 4, left: 0 }}>
+          <CartesianGrid stroke="#e3eaec" />
+          {series.low !== null && series.high !== null && <ReferenceArea y1={series.low} y2={series.high} fill="#0f766e" fillOpacity={0.1} stroke="none" />}
+          <XAxis dataKey="t" type="number" scale="time" domain={["dataMin", "dataMax"]} tick={axis}
+            tickFormatter={(v) => new Date(v).toLocaleDateString(undefined, { month: "short", year: "2-digit" })} />
+          <YAxis tick={axis} width={60} domain={[Math.min(...lows) - pad, Math.max(...highs) + pad]} tickFormatter={(v) => Number(v).toFixed(1).replace(/\.0$/, "")} />
+          <Tooltip labelFormatter={(v) => new Date(v as number).toLocaleDateString()} formatter={(v) => [`${v} ${series.unit}`, series.label]} />
+          <Line type="monotone" dataKey="value" stroke={PALETTE[0]} strokeWidth={2.2} dot={{ r: 4 }} isAnimationActive={false} />
+        </LineChart>
+      </ResponsiveContainer>
     </div>
   );
 }

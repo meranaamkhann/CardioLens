@@ -9,7 +9,7 @@ os.environ.update({
     "CARDIOLENS_ARTIFACTS": f"{_tmp}/artifacts",
     "RATE_LIMIT_ENABLED": "0",
     "CARDIOLENS_ENV": "test",
-    "SECRET_KEY": "test-secret-key-for-the-suite",
+    "SECRET_KEY": "test-secret-key-for-the-suite-0123456789-abcdef",
 })
 
 import itertools
