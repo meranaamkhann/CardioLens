@@ -327,3 +327,4 @@ progress { accent-color: var(--teal); vertical-align: middle; width: 140px; }
 .trend-card { text-align: left; display: grid; gap: 4px; cursor: pointer; }
 .trend-card.on { border-color: var(--teal); box-shadow: inset 0 0 0 1px var(--teal); }
 .trend-card .stat-value small { font-size: 0.8rem; color: var(--muted); font-weight: 400; }
+
