@@ -67,7 +67,7 @@ jobs:
       - name: Lowercase repository name
         run: echo "REPO=${GITHUB_REPOSITORY,,}" >> "$GITHUB_ENV"
       - name: Copy the production compose file
-        uses: appleboy/scp-action@v0.1.7
+        uses: appleboy/scp-action@v1.0.0
         with:
           host: ${{ secrets.DEPLOY_HOST }}
           username: ${{ secrets.DEPLOY_USER }}
